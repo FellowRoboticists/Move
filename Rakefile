@@ -3,14 +3,22 @@
 LIB_DIR = 'lib'
 BASE_DIR = '..'
 
-LIBS = %w{ AFMotor IrSensors Look PingSensor RobotMotor SoftServo }
+ADA_LIB = 'Adafruit-Motor-Shield-library'
+AFMOTOR_LIB = File.join(LIB_DIR, "AFMotor")
 
-task :default => :lib_setup
-
-desc "Set up the libraries we need for this project"
-task :lib_setup do
-  LIBS.each do | lib |
-    cp_r File.join(BASE_DIR, lib, LIB_DIR, lib), LIB_DIR
-  end
+directory AFMOTOR_LIB do
+  cp_r File.join(BASE_DIR, ADA_LIB), LIB_DIR
+  mv File.join(LIB_DIR, ADA_LIB), AFMOTOR_LIB
 end
 
+LIBS = %w{ IrSensors Look PingSensor RobotMotor SoftServo }
+
+LIBS.each do | lib |
+  directory File.join(LIB_DIR, lib) do
+    cp_r File.join(BASE_DIR, lib, LIB_DIR, lib), LIB_DIR
+  end
+
+  task :default => File.join(LIB_DIR, lib)
+end
+
+task :default => AFMOTOR_LIB
