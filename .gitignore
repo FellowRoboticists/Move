@@ -1,0 +1,8 @@
+*~
+.build
+lib/AFMotor
+lib/IrSensors
+lib/Look
+lib/PingSensor
+lib/RobotMotor
+lib/SoftServo
