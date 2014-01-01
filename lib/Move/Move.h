@@ -1,6 +1,8 @@
-// Move library
-// copyright Dave Sieh, 2013
-// This code is public domain, enjoy!
+// Move Arduino Library
+//
+// Copyright (c) 2012 Michael Margolis
+// Copyright (c) 2013 Dave Sieh
+// See LICENSE.txt for details
 
 #ifndef _Move_h_
 #define _Move_h_

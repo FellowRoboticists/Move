@@ -1,4 +1,9 @@
 # -*- ruby -*-
+# Move Arduino Library
+#
+# Copyright (c) 2012 Michael Margolis
+# Copyright (c) 2013 Dave Sieh
+# See LICENSE.txt for details
 
 LIB_DIR = 'lib'
 BASE_DIR = '..'
