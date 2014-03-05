@@ -22,7 +22,8 @@ LIBS = [
   library('Look'),
   library('PingSensor'),
   library('RobotMotor'),
-  library('SoftServo')
+  library('SoftServo'),
+  library('pspc_support')
 ]
 
 create_all_library_tasks env, LIBS, :default

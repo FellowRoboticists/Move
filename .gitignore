@@ -7,3 +7,4 @@ lib/Look
 lib/PingSensor
 lib/RobotMotor
 lib/SoftServo
+lib/pspc_support

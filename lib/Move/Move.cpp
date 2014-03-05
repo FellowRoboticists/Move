@@ -1,22 +1,36 @@
 // Move Arduino Library
 //
 // Copyright (c) 2012 Michael Margolis
-// Copyright (c) 2013 Dave Sieh
+// Copyright (c) 2013,2014 Dave Sieh
 // See LICENSE.txt for details
 
 #include <Arduino.h>
 #include "RobotMotor.h"
 #include "Move.h"
 #include "Look.h"
+#include "pspc_support.h"
 
-const char *states[] = {
-  "Left",
-  "Right",
-  "Forward",
-  "Back",
-  "Rotate",
-  "Stop"
+#ifdef MOVE_DEBUG
+// Build up the string table for the states
+#define STATE_NAME(i) STRING_FROM_TABLE(states,i)
+
+// Build up a string table for the sensor names
+const char left_state[] PROGMEM = "Left";
+const char right_state[] PROGMEM = "Right";
+const char forward_state[] PROGMEM = "Forward";
+const char back_state[] PROGMEM = "Back";
+const char rotate_state[] PROGMEM = "Rotate";
+const char stop_state[] PROGMEM = "Stop";
+
+PGM_P const states[] PROGMEM = {
+  left_state,
+  right_state,
+  forward_state,
+  back_state,
+  rotate_state,
+  stop_state
 };
+#endif
 
 Move::Move(Look *look) {
   state = MOV_STOP;
@@ -69,15 +83,21 @@ void Move::backward() {
 void Move::rotate(int angle) {
   changeMoveState(MOV_ROTATE);
 
-  Serial.print("Rotating "); 
+#ifdef MOVE_DEBUG
+  Serial.print(P("Rotating ")); 
   Serial.println(angle);
+#endif
 
   if (angle < 0) {
-    Serial.println(" (left)"); 
+#ifdef MOVE_DEBUG
+    Serial.println(P(" (left)")); 
+#endif
     motorReverse(MOTOR_LEFT,  speed); 
     motorForward(MOTOR_RIGHT, speed);  
   } else if (angle > 0) {
-    Serial.println(" (right)");
+#ifdef MOVE_DEBUG
+    Serial.println(P(" (right)"));
+#endif
     motorForward(MOTOR_LEFT,  speed);
     motorReverse(MOTOR_RIGHT, speed);
   }  
@@ -107,7 +127,9 @@ void Move::setSpeed(int newSpeed) {
 }
 
 void Move::slower(int decrement) {
-  Serial.print(" Slower: "); 
+#ifdef MOVE_DEBUG
+  Serial.print(P(" Slower: ")); 
+#endif
 
   if (speed >= speedIncrement + MIN_SPEED) {
     speed -= speedIncrement;
@@ -119,7 +141,9 @@ void Move::slower(int decrement) {
 }
 
 void Move::faster(int increment) {
-  Serial.print(" Faster: ");
+#ifdef MOVE_DEBUG
+  Serial.print(P(" Faster: "));
+#endif
   speed += speedIncrement; 
 
   if (speed > 100) {
@@ -161,8 +185,10 @@ long Move::rotationAngleToTime(int angle) {
 
 void Move::changeMoveState(MoveState newState) {
   if (newState != state) {
-    Serial.print("Changing move state from "); Serial.print(states[state]);
-    Serial.print(" to "); Serial.println(states[newState]);
+#ifdef MOVE_DEBUG
+    Serial.print(P("Changing move state from ")); Serial.print(STATE_NAME(state));
+    Serial.print(P(" to ")); Serial.println(STATE_NAME(newState));
+#endif
     state = newState;
   } 
 }
@@ -172,20 +198,28 @@ MoveState Move::getState() {
 }
 
 void Move::timedMove(MoveState direction, int duration) {
-  Serial.print("Timed move ");
+#ifdef MOVE_DEBUG
+  Serial.print(P("Timed move "));
+#endif
   if (direction == MOV_FORWARD) {
 
-    Serial.println("forward");
+#ifdef MOVE_DEBUG
+    Serial.println(P("forward"));
+#endif
     forward();    
 
   } else if (direction == MOV_BACK) {
 
-    Serial.println("back");
+#ifdef MOVE_DEBUG
+    Serial.println(P("back"));
+#endif
     backward();     
 
   } else {
 
-    Serial.println("?");
+#ifdef MOVE_DEBUG
+    Serial.println(P("?"));
+#endif
 
   }
     
@@ -203,7 +237,9 @@ void Move::movingDelay(long duration) {
     if (isPathClear()) { 
       if (state != MOV_ROTATE) {
 	// rotate is only valid movement
-	Serial.println("Stopping in moving Delay()"); 
+#ifdef MOVE_DEBUG
+	Serial.println(P("Stopping in moving Delay()")); 
+#endif
 	brake(); 
       }
     }  
@@ -217,7 +253,9 @@ void Move::roam() {
   if (forwardDistance == 0) { 
     // no sensor
     stop();
-    Serial.println("No front sensor");
+#ifdef MOVE_DEBUG
+    Serial.println(P("No front sensor"));
+#endif
     return;  // No point in continuing...
   }
   
@@ -229,7 +267,9 @@ void Move::roam() {
 void Move::avoidEdge() {
   if (looker->sensesObstacle(OBST_FRONT_EDGE, MIN_DISTANCE)) {
 
-    Serial.println("left and right sensors detected edge");
+#ifdef MOVE_DEBUG
+    Serial.println(P("left and right sensors detected edge"));
+#endif
     timedMove(MOV_BACK, 300);
     rotate(120);
     while (looker->sensesObstacle(OBST_FRONT_EDGE, MIN_DISTANCE)) {
@@ -238,13 +278,17 @@ void Move::avoidEdge() {
 
   } else if (looker->sensesObstacle(OBST_LEFT_EDGE, MIN_DISTANCE)) {
 
-    Serial.println("left sensor detected edge");
+#ifdef MOVE_DEBUG
+    Serial.println(P("left sensor detected edge"));
+#endif
     timedMove(MOV_BACK, 100);
     rotate(30);
 
   } else if (looker->sensesObstacle(OBST_RIGHT_EDGE, MIN_DISTANCE)) {
 
-    Serial.println("right sensor detected edge");
+#ifdef MOVE_DEBUG
+    Serial.println(P("right sensor detected edge"));
+#endif
     timedMove(MOV_BACK, 100);
     rotate(-30); 
 
